@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { increment, decrement, add, del } from './redux/valueSlice';
-import './App.css';
-import Counter from './components/Counter';
-
+import { increment, decrement, add, del } from 'redux/valueSlice';
+import Counter from 'components/Counter';
+import * as pokemonsOperations from 'redux/pokemons/pokemonsOperations';
+import 'App.css';
+import { getPokemons } from 'redux/pokemons/pokemonsSelectors';
 function App() {
   const [text, setText] = useState('');
   const numberOfClicks = useSelector((state) => state.value);
+  const pokemons = useSelector((state) => state.pokemons.entities.results);
   const dispatch = useDispatch();
 
   const dataList = useSelector((state) => state.items);
@@ -18,11 +20,14 @@ function App() {
   const handleSubmit = (event) => {
     event.preventDefault();
     dispatch(add(text));
-    //  event.currentTarget.reset();
     setText('');
   };
 
-  console.log(' text.length > 1', text.length);
+  useEffect(() => {
+    dispatch(pokemonsOperations.fetchPokemons());
+  }, [dispatch]);
+
+  console.log('pokemons', pokemons);
 
   return (
     <>
@@ -69,6 +74,13 @@ function App() {
             </div>
           );
         })}
+
+      <ul>
+        {pokemons &&
+          pokemons.map((pokemon, idx) => {
+            return <li key={idx}>{pokemon.name}</li>;
+          })}
+      </ul>
     </>
   );
 }
